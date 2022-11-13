@@ -18,18 +18,13 @@ func IsChoiceCorrect(ctx context.Context, choiceID entity.ChoiceID) (bool, error
 }
 
 func CreateQuiz(ctx context.Context, newQuiz NewQuiz) error {
-	category, err := repository.Default.Category.Get(ctx, expr.TitleEquals(newQuiz.Category))
-	if err != nil {
-		return err
-	}
-
 	tsx, err := db.BeginTSX(ctx)
 	if err != nil {
 		return err
 	}
 
 	q := entity.Quiz{
-		CategoryID:  category.ID,
+		CategoryID:  newQuiz.CategoryID,
 		Title:       newQuiz.Title,
 		Description: newQuiz.Description,
 	}

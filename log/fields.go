@@ -20,6 +20,10 @@ func ChoiceID(id entity.ChoiceID) single {
 	return newSingle(zap.Int("ChoiceID", int(id)))
 }
 
+func JSONData(data []byte) single {
+	return newSingle(zap.ByteString("JSONData", data))
+}
+
 func Exprs(exprs ...expr.Expr) multi {
 	fields := make([]zap.Field, 0, len(exprs))
 	for _, expr := range exprs {

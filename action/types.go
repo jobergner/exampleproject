@@ -1,8 +1,10 @@
 package action
 
+import "exampleproject/entity"
+
 type (
 	NewQuiz struct {
-		Category    string
+		CategoryID  entity.CategoryID
 		Title       string
 		Description string
 		Choices     []NewChoice

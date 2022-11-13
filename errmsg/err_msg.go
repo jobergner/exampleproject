@@ -29,3 +29,15 @@ func QueryCreate(name string) string {
 func EvalResultID(name string) string {
 	return fmt.Sprintf("failed evaluating last inserted %s ID", name)
 }
+
+func Unmarshal(name string) string {
+	return fmt.Sprintf("failed unmarshalling %s", name)
+}
+
+func ReadBody(handlerName string) string {
+	return fmt.Sprintf("failed reading %s body", handlerName)
+}
+
+func Serve() string {
+	return fmt.Sprintf("failed starting server")
+}
