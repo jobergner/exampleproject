@@ -25,11 +25,11 @@ func (q *CategoryRepository) Get(ctx context.Context, selectors ...expr.Expr) (*
 		return nil, err
 	}
 	if len(categories) == 0 {
-		log.Log(errmsg.NotFound("category"), log.Err(db.ErrNotFound), log.Exprs(selectors...))
+		log.Log(errmsg.NotFound("Category"), log.Err(db.ErrNotFound), log.Exprs(selectors...))
 		return nil, db.ErrNotFound
 	}
 	if len(categories) > 1 {
-		log.Log(errmsg.TooManyResults("categories"), log.Err(db.ErrTooManyResults), log.Exprs(selectors...))
+		log.Log(errmsg.TooManyResults("Category"), log.Err(db.ErrTooManyResults), log.Exprs(selectors...))
 		return nil, db.ErrTooManyResults
 	}
 	return &categories[0], nil
@@ -44,7 +44,7 @@ func (q *CategoryRepository) List(ctx context.Context, selectors ...expr.Expr) (
 
 	sqlStr, args, err := builder.ToSql()
 	if err != nil {
-		log.Log(errmsg.QueryBuild("list categories"), log.Err(err), log.Exprs(selectors...))
+		log.Log(errmsg.QueryBuild("list Categories"), log.Err(err), log.Exprs(selectors...))
 		return nil, err
 	}
 
@@ -53,7 +53,7 @@ func (q *CategoryRepository) List(ctx context.Context, selectors ...expr.Expr) (
 		if errors.Is(err, sql.ErrNoRows) {
 			return categories, nil
 		}
-		log.Log(errmsg.QuerySelect("categories"), log.Err(err), log.Exprs(selectors...))
+		log.Log(errmsg.QuerySelect("Categories"), log.Err(err), log.Exprs(selectors...))
 		return nil, err
 	}
 
@@ -69,24 +69,30 @@ func (q *CategoryRepository) Update(ctx context.Context, transaction *db.TSX, se
 
 	sqlStr, args, err := builder.ToSql()
 	if err != nil {
-		log.Log(errmsg.QueryBuild("update categories"), log.Err(err), log.Exprs(selectors...))
+		log.Log(errmsg.QueryBuild("update Category"), log.Err(err), log.Exprs(selectors...))
 		return err
 	}
 
 	if _, err := transaction.Get().ExecContext(ctx, sqlStr, args...); err != nil {
-		_ = transaction.Rollback()
-		log.Log(errmsg.QueryUpdate("categories"), log.Err(err), log.Exprs(selectors...))
+		log.Log(errmsg.QueryUpdate("Category"), log.Err(err), log.Exprs(selectors...))
 		return err
 	}
 
 	return nil
 }
 
-func (q *CategoryRepository) Create(ctx context.Context, transaction *db.TSX, category *entity.Category) error {
-	if _, err := transaction.Get().NamedExecContext(ctx, entity.CategoryMeta.ToInsertQueryString(), category); err != nil {
-		log.Log(errmsg.QueryCreate("category"), log.Err(err))
-		return err
+func (q *CategoryRepository) Create(ctx context.Context, transaction *db.TSX, category *entity.Category) (entity.CategoryID, error) {
+	result, err := transaction.Get().NamedExecContext(ctx, entity.CategoryMeta.ToInsertQueryString(), category)
+	if err != nil {
+		log.Log(errmsg.QueryCreate("Category"), log.Err(err))
+		return 0, err
 	}
 
-	return nil
+	id, err := result.LastInsertId()
+	if err != nil {
+		log.Log(errmsg.EvalResultID("Category"), log.Err(err))
+		return 0, err
+	}
+
+	return entity.CategoryID(id), nil
 }

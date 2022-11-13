@@ -25,11 +25,11 @@ func (q *QuizRepository) Get(ctx context.Context, selectors ...expr.Expr) (*enti
 		return nil, err
 	}
 	if len(quizzes) == 0 {
-		log.Log(errmsg.NotFound("quiz"), log.Err(db.ErrNotFound), log.Exprs(selectors...))
+		log.Log(errmsg.NotFound("Quiz"), log.Err(db.ErrNotFound), log.Exprs(selectors...))
 		return nil, db.ErrNotFound
 	}
 	if len(quizzes) > 1 {
-		log.Log(errmsg.TooManyResults("quizzes"), log.Err(db.ErrTooManyResults), log.Exprs(selectors...))
+		log.Log(errmsg.TooManyResults("Quiz"), log.Err(db.ErrTooManyResults), log.Exprs(selectors...))
 		return nil, db.ErrTooManyResults
 	}
 	return &quizzes[0], nil
@@ -44,7 +44,7 @@ func (q *QuizRepository) List(ctx context.Context, selectors ...expr.Expr) ([]en
 
 	sqlStr, args, err := builder.ToSql()
 	if err != nil {
-		log.Log(errmsg.QueryBuild("list quizzes"), log.Err(err), log.Exprs(selectors...))
+		log.Log(errmsg.QueryBuild("list Quizzes"), log.Err(err), log.Exprs(selectors...))
 		return nil, err
 	}
 
@@ -53,7 +53,7 @@ func (q *QuizRepository) List(ctx context.Context, selectors ...expr.Expr) ([]en
 		if errors.Is(err, sql.ErrNoRows) {
 			return quizzes, nil
 		}
-		log.Log(errmsg.QuerySelect("quizzes"), log.Err(err), log.Exprs(selectors...))
+		log.Log(errmsg.QuerySelect("Quizzes"), log.Err(err), log.Exprs(selectors...))
 		return nil, err
 	}
 
@@ -69,24 +69,30 @@ func (q *QuizRepository) Update(ctx context.Context, transaction *db.TSX, setMap
 
 	sqlStr, args, err := builder.ToSql()
 	if err != nil {
-		log.Log(errmsg.QueryBuild("update quizzes"), log.Err(err), log.Exprs(selectors...))
+		log.Log(errmsg.QueryBuild("update Quiz"), log.Err(err), log.Exprs(selectors...))
 		return err
 	}
 
 	if _, err := transaction.Get().ExecContext(ctx, sqlStr, args...); err != nil {
-		_ = transaction.Rollback()
-		log.Log(errmsg.QueryUpdate("quizzes"), log.Err(err), log.Exprs(selectors...))
+		log.Log(errmsg.QueryUpdate("Quiz"), log.Err(err), log.Exprs(selectors...))
 		return err
 	}
 
 	return nil
 }
 
-func (q *QuizRepository) Create(ctx context.Context, transaction *db.TSX, quiz *entity.Quiz) error {
-	if _, err := transaction.Get().NamedExecContext(ctx, entity.QuizMeta.ToInsertQueryString(), quiz); err != nil {
-		log.Log(errmsg.QueryCreate("quiz"), log.Err(err))
-		return err
+func (q *QuizRepository) Create(ctx context.Context, transaction *db.TSX, quiz *entity.Quiz) (entity.QuizID, error) {
+	result, err := transaction.Get().NamedExecContext(ctx, entity.QuizMeta.ToInsertQueryString(), quiz)
+	if err != nil {
+		log.Log(errmsg.QueryCreate("Quiz"), log.Err(err))
+		return 0, err
 	}
 
-	return nil
+	id, err := result.LastInsertId()
+	if err != nil {
+		log.Log(errmsg.EvalResultID("Quiz"), log.Err(err))
+		return 0, err
+	}
+
+	return entity.QuizID(id), nil
 }

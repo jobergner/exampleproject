@@ -23,8 +23,8 @@ type TSX struct {
 var NoTSX = new(TSX)
 
 type Executer interface {
-	sqlx.ExtContext
 	NamedExecContext(ctx context.Context, query string, arg interface{}) (sql.Result, error)
+	ExecContext(ctx context.Context, query string, args ...interface{}) (sql.Result, error)
 }
 
 func (t *TSX) Get() Executer {
@@ -35,15 +35,18 @@ func (t *TSX) Get() Executer {
 	return t.tsx
 }
 
-func (t *TSX) Begin(ctx context.Context) (sqlx.ExecerContext, error) {
+// TODO: logging?
+func BeginTSX(ctx context.Context) (*TSX, error) {
 	tsx, err := DB.BeginTxx(ctx, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	t.tsx = tsx
+	t := TSX{
+		tsx: tsx,
+	}
 
-	return tsx, nil
+	return &t, nil
 }
 
 func (t *TSX) Rollback() error {

@@ -11,6 +11,10 @@ type Expr struct {
 	Name string
 }
 
+func IDEquals(id int) Expr {
+	return Expr{SQL: squirrel.Expr("QuizID = ?", id), Name: "IDEquals"}
+}
+
 func QuizIDEquals(quizID entity.QuizID) Expr {
 	return Expr{SQL: squirrel.Expr("QuizID = ?", quizID), Name: "QuizIDEquals"}
 }
@@ -25,6 +29,10 @@ func CategoryIDEquals(categoryID entity.CategoryID) Expr {
 
 func ChoiceIsCorrect() Expr {
 	return Expr{SQL: squirrel.Expr("IsCorrect = 1"), Name: "ChoiceIsCorrect"}
+}
+
+func TitleEquals(title string) Expr {
+	return Expr{SQL: squirrel.Expr("Title = ?", title), Name: "ChoiceIsCorrect"}
 }
 
 func IsNotArchived() Expr {

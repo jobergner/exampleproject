@@ -25,11 +25,11 @@ func (q *ChoiceRepository) Get(ctx context.Context, selectors ...expr.Expr) (*en
 		return nil, err
 	}
 	if len(choices) == 0 {
-		log.Log(errmsg.NotFound("choice"), log.Err(db.ErrNotFound), log.Exprs(selectors...))
+		log.Log(errmsg.NotFound("Choice"), log.Err(db.ErrNotFound), log.Exprs(selectors...))
 		return nil, db.ErrNotFound
 	}
 	if len(choices) > 1 {
-		log.Log(errmsg.TooManyResults("choices"), log.Err(db.ErrTooManyResults), log.Exprs(selectors...))
+		log.Log(errmsg.TooManyResults("Choice"), log.Err(db.ErrTooManyResults), log.Exprs(selectors...))
 		return nil, db.ErrTooManyResults
 	}
 	return &choices[0], nil
@@ -44,7 +44,7 @@ func (q *ChoiceRepository) List(ctx context.Context, selectors ...expr.Expr) ([]
 
 	sqlStr, args, err := builder.ToSql()
 	if err != nil {
-		log.Log(errmsg.QueryBuild("list choices"), log.Err(err), log.Exprs(selectors...))
+		log.Log(errmsg.QueryBuild("list Choices"), log.Err(err), log.Exprs(selectors...))
 		return nil, err
 	}
 
@@ -53,7 +53,7 @@ func (q *ChoiceRepository) List(ctx context.Context, selectors ...expr.Expr) ([]
 		if errors.Is(err, sql.ErrNoRows) {
 			return choices, nil
 		}
-		log.Log(errmsg.QuerySelect("choices"), log.Err(err), log.Exprs(selectors...))
+		log.Log(errmsg.QuerySelect("Choices"), log.Err(err), log.Exprs(selectors...))
 		return nil, err
 	}
 
@@ -69,24 +69,30 @@ func (q *ChoiceRepository) Update(ctx context.Context, transaction *db.TSX, setM
 
 	sqlStr, args, err := builder.ToSql()
 	if err != nil {
-		log.Log(errmsg.QueryBuild("update choices"), log.Err(err), log.Exprs(selectors...))
+		log.Log(errmsg.QueryBuild("update Choice"), log.Err(err), log.Exprs(selectors...))
 		return err
 	}
 
 	if _, err := transaction.Get().ExecContext(ctx, sqlStr, args...); err != nil {
-		_ = transaction.Rollback()
-		log.Log(errmsg.QueryUpdate("choices"), log.Err(err), log.Exprs(selectors...))
+		log.Log(errmsg.QueryUpdate("Choice"), log.Err(err), log.Exprs(selectors...))
 		return err
 	}
 
 	return nil
 }
 
-func (q *ChoiceRepository) Create(ctx context.Context, transaction *db.TSX, choice *entity.Choice) error {
-	if _, err := transaction.Get().NamedExecContext(ctx, entity.ChoiceMeta.ToInsertQueryString(), choice); err != nil {
-		log.Log(errmsg.QueryCreate("choice"), log.Err(err))
-		return err
+func (q *ChoiceRepository) Create(ctx context.Context, transaction *db.TSX, choice *entity.Choice) (entity.ChoiceID, error) {
+	result, err := transaction.Get().NamedExecContext(ctx, entity.ChoiceMeta.ToInsertQueryString(), choice)
+	if err != nil {
+		log.Log(errmsg.QueryCreate("Choice"), log.Err(err))
+		return 0, err
 	}
 
-	return nil
+	id, err := result.LastInsertId()
+	if err != nil {
+		log.Log(errmsg.EvalResultID("Choice"), log.Err(err))
+		return 0, err
+	}
+
+	return entity.ChoiceID(id), nil
 }

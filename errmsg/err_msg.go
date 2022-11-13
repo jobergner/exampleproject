@@ -7,7 +7,7 @@ func NotFound(name string) string {
 }
 
 func TooManyResults(name string) string {
-	return fmt.Sprintf("found too many %s", name)
+	return fmt.Sprintf("found more than one %s", name)
 }
 
 func QueryBuild(name string) string {
@@ -24,4 +24,8 @@ func QueryUpdate(name string) string {
 
 func QueryCreate(name string) string {
 	return fmt.Sprintf("failed creating %s", name)
+}
+
+func EvalResultID(name string) string {
+	return fmt.Sprintf("failed evaluating last inserted %s ID", name)
 }
