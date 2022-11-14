@@ -2,7 +2,7 @@ package log
 
 import (
 	"exampleproject/entity"
-	"exampleproject/expr"
+	"exampleproject/repository/expression"
 
 	"github.com/Masterminds/squirrel"
 	"go.uber.org/zap"
@@ -24,12 +24,16 @@ func JSONData(data []byte) single {
 	return newSingle(zap.ByteString("JSONData", data))
 }
 
-func Exprs(exprs ...expr.Expr) multi {
+func Exprs(exprs ...expression.Expr) multi {
 	fields := make([]zap.Field, 0, len(exprs))
 	for _, expr := range exprs {
 		fields = append(fields, zap.String(expr.Name, squirrel.DebugSqlizer(expr.SQL)))
 	}
 	return newMulti(fields)
+}
+
+func SQLQuery(builder squirrel.Sqlizer) single {
+	return newSingle(zap.String("Query", squirrel.DebugSqlizer(builder)))
 }
 
 func Err(err error) single {

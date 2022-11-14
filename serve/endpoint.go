@@ -3,7 +3,6 @@ package serve
 import (
 	"encoding/json"
 	"exampleproject/action"
-	"exampleproject/errmsg"
 	"exampleproject/log"
 	"io"
 	"net/http"
@@ -18,13 +17,13 @@ func newHandler() http.Handler {
 func createQuizHandler(w http.ResponseWriter, r *http.Request) {
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
-		log.Log(errmsg.ReadBody("createQuizHandler"))
+		log.Log(log.ReadBody)
 		return
 	}
 
 	var quiz action.NewQuiz
 	if err := json.Unmarshal(body, &quiz); err != nil {
-		log.Log(errmsg.Unmarshal("NewQuiz"), log.JSONData(body))
+		log.Log(log.Unmarshal, log.JSONData(body))
 		return
 	}
 

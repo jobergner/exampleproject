@@ -3,7 +3,6 @@ package serve
 import (
 	"context"
 	"errors"
-	"exampleproject/errmsg"
 	"exampleproject/log"
 	"fmt"
 	"net/http"
@@ -37,17 +36,7 @@ func StartServer() error {
 
 	go func() {
 		<-onSigInt
-
-		ctx, cancel := context.WithTimeout(context.Background(), maxRequestDuration)
-		defer cancel()
-
-		if err := server.Shutdown(ctx); err != nil {
-			log.Log("shutdown error", log.Err(err))
-			return
-		}
-
-		fmt.Println("gracefully stopped")
-		onShutdownFinished <- struct{}{}
+		shutdownGracefully(server, onShutdownFinished)
 	}()
 
 	err := server.ListenAndServe()
@@ -56,9 +45,22 @@ func StartServer() error {
 			<-onShutdownFinished
 			return nil
 		}
-		log.Log(errmsg.Serve(), log.Err(err))
+		log.Log(log.Serve, log.Err(err))
 		return err
 	}
 
 	return nil
+}
+
+func shutdownGracefully(server *http.Server, onShutdownFinished chan<- struct{}) {
+	defer func() { onShutdownFinished <- struct{}{} }()
+	ctx, cancel := context.WithTimeout(context.Background(), maxRequestDuration)
+	defer cancel()
+
+	if err := server.Shutdown(ctx); err != nil {
+		log.Log("shutdown error", log.Err(err))
+		return
+	}
+
+	fmt.Println("gracefully stopped")
 }

@@ -4,12 +4,12 @@ import (
 	"context"
 	"exampleproject/db"
 	"exampleproject/entity"
-	"exampleproject/expr"
 	"exampleproject/repository"
+	"exampleproject/repository/expression"
 )
 
 func IsChoiceCorrect(ctx context.Context, choiceID entity.ChoiceID) (bool, error) {
-	choice, err := repository.Default.Choice.Get(ctx, expr.IDEquals(int(choiceID)))
+	choice, err := repository.Default.Choice.Get(ctx, expression.IDEquals(int(choiceID)))
 	if err != nil {
 		return false, err
 	}
