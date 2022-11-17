@@ -17,12 +17,13 @@ const (
 )
 
 func newDefaultServer(handler http.Handler) *http.Server {
+	th := http.TimeoutHandler(handler, maxRequestDuration, "TimeoutHandler reached deadline")
 	return &http.Server{
 		ReadTimeout:  1 * time.Second,
 		WriteTimeout: 1 * time.Second,
 		IdleTimeout:  30 * time.Second,
 		Addr:         ":8080",
-		Handler:      http.TimeoutHandler(handler, maxRequestDuration, "TimeoutHandler reached deadline"),
+		Handler:      th,
 	}
 }
 
@@ -58,7 +59,7 @@ func shutdownGracefully(server *http.Server, onShutdownFinished chan<- struct{})
 	defer cancel()
 
 	if err := server.Shutdown(ctx); err != nil {
-		log.Log("shutdown error", log.Err(err))
+		log.Log(log.ServerShutdown, log.Err(err))
 		return
 	}
 

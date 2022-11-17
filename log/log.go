@@ -5,6 +5,10 @@ import (
 )
 
 const (
+	ServerShutdown = "failed shutting down server"
+	BeginTSX       = "failed creating transaction"
+	RollbackTSX    = "failed rolling back transaction"
+	CommitTSX      = "failed committing transaction"
 	NotFound       = "could not find item"
 	TooManyResults = "found more than one item"
 	QueryBuild     = "failed building query"

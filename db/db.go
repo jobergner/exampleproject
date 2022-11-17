@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"exampleproject/log"
 
 	"github.com/jmoiron/sqlx"
 )
@@ -35,10 +36,10 @@ func (t *TSX) Get() Executer {
 	return t.tsx
 }
 
-// TODO: logging?
 func BeginTSX(ctx context.Context) (*TSX, error) {
 	tsx, err := DB.BeginTxx(ctx, nil)
 	if err != nil {
+		log.Log(log.BeginTSX, log.Err(err))
 		return nil, err
 	}
 
@@ -50,12 +51,18 @@ func BeginTSX(ctx context.Context) (*TSX, error) {
 }
 
 func (t *TSX) Rollback() error {
-	return t.tsx.Rollback()
+	if err := t.tsx.Rollback(); err != nil {
+		log.Log(log.RollbackTSX, log.Err(err))
+		return err
+	}
+
+	return nil
 }
 
 func (t *TSX) Commit() error {
 	if err := t.tsx.Commit(); err != nil {
 		_ = t.Rollback()
+		log.Log(log.CommitTSX, log.Err(err))
 		return err
 	}
 

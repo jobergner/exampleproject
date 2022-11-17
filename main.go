@@ -2,7 +2,6 @@ package main
 
 import (
 	"exampleproject/db"
-	"exampleproject/migration"
 	"fmt"
 
 	"github.com/joho/godotenv"
@@ -18,7 +17,7 @@ func main() {
 		panic(err)
 	}
 
-	if err := migration.Migrate(); err != nil {
+	if err := db.MigrateUp(); err != nil {
 		panic(err)
 	}
 }
