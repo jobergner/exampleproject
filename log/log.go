@@ -16,6 +16,7 @@ const (
 	ReadBody       = "failed reading request body"
 	Serve          = "failed starting server"
 	DBConnection   = "failed connecting to DB"
+	Migration      = "failed in migration process"
 )
 
 var Logger, _ = zap.NewDevelopment(zap.AddStacktrace(zap.ErrorLevel), zap.AddCallerSkip(1))

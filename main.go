@@ -1,24 +1,24 @@
 package main
 
 import (
-	"exampleproject/expr"
-	"exampleproject/log"
-	"time"
+	"exampleproject/db"
+	"exampleproject/migration"
+	"fmt"
 
-	"go.uber.org/zap"
+	"github.com/joho/godotenv"
 )
 
 func main() {
+	err := godotenv.Load(".env")
+	if err != nil {
+		panic(fmt.Errorf("error reading env file: %s", err))
+	}
 
-	log.Log("hello", log.CategoryID(123), log.Exprs(expr.CategoryIDEquals(234)))
-	logger, _ := zap.NewProduction()
-	defer logger.Sync() // flushes buffer, if any
-	sugar := logger.Sugar()
-	sugar.Infow("failed to fetch URL",
-		// Structured context as loosely typed key-value pairs.
-		"url", "URL",
-		"attempt", 3,
-		"backoff", time.Second,
-	)
-	sugar.Infof("Failed to fetch URL: %s", "url")
+	if err := db.Connect(); err != nil {
+		panic(err)
+	}
+
+	if err := migration.Migrate(); err != nil {
+		panic(err)
+	}
 }

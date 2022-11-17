@@ -6,7 +6,10 @@ require (
 	github.com/Masterminds/squirrel v1.5.3
 	github.com/docker/docker v20.10.21+incompatible
 	github.com/docker/go-connections v0.4.0
+	github.com/golang-migrate/migrate/v4 v4.15.2
 	github.com/jmoiron/sqlx v1.3.5
+	github.com/joho/godotenv v1.3.0
+	github.com/lib/pq v1.10.0
 	go.uber.org/zap v1.23.0
 )
 
@@ -15,10 +18,11 @@ require (
 	github.com/docker/distribution v2.8.1+incompatible // indirect
 	github.com/docker/go-units v0.5.0 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
+	github.com/hashicorp/errwrap v1.1.0 // indirect
+	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/lann/builder v0.0.0-20180802200727-47ae307949d0 // indirect
 	github.com/lann/ps v0.0.0-20150810152359-62de8c46ede0 // indirect
 	github.com/moby/term v0.0.0-20221105221325-4eb28fa6025c // indirect
-	github.com/morikuni/aec v1.0.0 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.0.2 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
