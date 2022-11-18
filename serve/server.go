@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"exampleproject/log"
-	"fmt"
 	"net/http"
 	"os"
 	"os/signal"
@@ -27,34 +26,36 @@ func newDefaultServer(handler http.Handler) *http.Server {
 	}
 }
 
-func StartServer() error {
+func Listen() (<-chan error, chan<- os.Signal) {
 	handler := newHandler()
 	server := newDefaultServer(handler)
 
-	onSigInt := make(chan os.Signal, 1)
-	signal.Notify(onSigInt, syscall.SIGINT)
-	onShutdownFinished := make(chan struct{}, 1)
+	signalSigInt := make(chan os.Signal, 1)
+	signal.Notify(signalSigInt, syscall.SIGINT)
+	signalShutdown := make(chan error, 1)
 
 	go func() {
-		<-onSigInt
-		shutdownGracefully(server, onShutdownFinished)
+		<-signalSigInt
+		shutdownGracefully(server)
 	}()
 
-	err := server.ListenAndServe()
-	if err != nil {
-		if errors.Is(err, http.ErrServerClosed) {
-			<-onShutdownFinished
-			return nil
+	go func() {
+		err := server.ListenAndServe()
+		if err != nil {
+			if errors.Is(err, http.ErrServerClosed) {
+				log.TEMPDDEBUG("gracefully stopped")
+				signalShutdown <- nil
+			} else {
+				log.Log(log.Serve, log.Err(err))
+				signalShutdown <- err
+			}
 		}
-		log.Log(log.Serve, log.Err(err))
-		return err
-	}
+	}()
 
-	return nil
+	return signalShutdown, signalSigInt
 }
 
-func shutdownGracefully(server *http.Server, onShutdownFinished chan<- struct{}) {
-	defer func() { onShutdownFinished <- struct{}{} }()
+func shutdownGracefully(server *http.Server) {
 	ctx, cancel := context.WithTimeout(context.Background(), maxRequestDuration)
 	defer cancel()
 
@@ -62,6 +63,4 @@ func shutdownGracefully(server *http.Server, onShutdownFinished chan<- struct{})
 		log.Log(log.ServerShutdown, log.Err(err))
 		return
 	}
-
-	fmt.Println("gracefully stopped")
 }

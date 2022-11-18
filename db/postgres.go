@@ -1,11 +1,10 @@
 package db
 
 import (
+	"errors"
 	"exampleproject/log"
 	"fmt"
 	"os"
-
-	"errors"
 
 	"github.com/jmoiron/sqlx"
 
@@ -60,6 +59,8 @@ func MigrateUp() error {
 		log.Log(log.Migration, log.Err(err))
 		return err
 	}
+
+	log.TEMPDDEBUG("migrations applied")
 
 	return nil
 }

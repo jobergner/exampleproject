@@ -6,18 +6,16 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"path/filepath"
 	"time"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
-	"github.com/docker/docker/api/types/mount"
 	"github.com/docker/docker/client"
 	"github.com/docker/docker/pkg/stdcopy"
 	"github.com/docker/go-connections/nat"
 )
 
-func waitForDB(killFunc func() error) error {
+func waitForDB() error {
 	var err error
 
 	for i := 0; i < 5; i++ {
@@ -54,19 +52,7 @@ func StartPostgres() (func() error, error) {
 		ExposedPorts: nat.PortSet{"5432:5432": struct{}{}},
 	}
 
-	initSQLFilePath, err := filepath.Abs("../init.sql")
-	if err != nil {
-		return nil, err
-	}
-
 	hostConfig := &container.HostConfig{
-		Mounts: []mount.Mount{
-			{
-				Type:   mount.TypeBind,
-				Source: initSQLFilePath,
-				Target: "/docker-entrypoint-initdb.d/init.sql",
-			},
-		},
 		PortBindings: nat.PortMap{
 			"5432/tcp": []nat.PortBinding{
 				{
@@ -104,11 +90,14 @@ func StartPostgres() (func() error, error) {
 		stdcopy.StdCopy(os.Stdout, os.Stderr, out)
 	}()
 
-	killFunc := func() error { return cli.ContainerKill(ctx, resp.ID, "SIGKILL") }
+	cancel := func() error { return cli.ContainerKill(ctx, resp.ID, "SIGKILL") }
 
-	if err := waitForDB(killFunc); err != nil {
+	if err := waitForDB(); err != nil {
+		if err := cancel(); err != nil {
+			return nil, err
+		}
 		return nil, err
 	}
 
-	return killFunc, nil
+	return cancel, nil
 }

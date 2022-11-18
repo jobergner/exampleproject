@@ -5,6 +5,7 @@ import (
 )
 
 const (
+	ReadingEnv     = "failed reading environment variables"
 	ServerShutdown = "failed shutting down server"
 	BeginTSX       = "failed creating transaction"
 	RollbackTSX    = "failed rolling back transaction"
@@ -24,6 +25,16 @@ const (
 )
 
 var Logger, _ = zap.NewDevelopment(zap.AddStacktrace(zap.ErrorLevel), zap.AddCallerSkip(1))
+
+// TEMPDDEBUG should only be used for remporarily debugging and never
+// apprear in production code
+func TEMPDDEBUG(msg string, loggables ...Loggable) {
+	var fields []zap.Field
+	for _, l := range loggables {
+		fields = append(fields, l.Fields()...)
+	}
+	Logger.Debug(msg, fields...)
+}
 
 func Log(msg string, loggables ...Loggable) {
 	var fields []zap.Field
