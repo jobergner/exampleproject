@@ -1,4 +1,4 @@
-package action
+package api
 
 import "exampleproject/entity"
 
@@ -12,5 +12,9 @@ type (
 	NewChoice struct {
 		IsCorrect bool
 		Content   string
+	}
+	LoginData struct {
+		Name     string
+		password string
 	}
 )

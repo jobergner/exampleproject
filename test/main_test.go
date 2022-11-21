@@ -2,7 +2,7 @@ package test
 
 import (
 	"exampleproject/db"
-	"exampleproject/serve"
+	"exampleproject/server"
 	"os"
 	"path"
 	"runtime"
@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-func TestMain(t *testing.T) {
+func init() {
 	// NOTE: we pretend we're running from root directory
 	_, filename, _, _ := runtime.Caller(0)
 	dir := path.Join(path.Dir(filename), "..")
@@ -23,7 +23,9 @@ func TestMain(t *testing.T) {
 	os.Setenv("POSTGRES_USER", "TEST_USER")
 	os.Setenv("POSTGRES_PASSWORD", "TEST_PASSWORD")
 	os.Setenv("POSTGRES_DB", "TEST_DB")
+}
 
+func TestMain(t *testing.T) {
 	cancel, err := StartPostgres()
 	if err != nil {
 		panic(err)
@@ -38,7 +40,7 @@ func TestMain(t *testing.T) {
 		panic(err)
 	}
 
-	signalShutdown, signalSigInt := serve.Listen()
+	signalShutdown, signalSigInt := server.Listen()
 
 	time.Sleep(time.Second * 3)
 

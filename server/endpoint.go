@@ -1,8 +1,8 @@
-package serve
+package server
 
 import (
 	"encoding/json"
-	"exampleproject/action"
+	"exampleproject/api"
 	"exampleproject/log"
 	"io"
 	"net/http"
@@ -11,6 +11,9 @@ import (
 func newHandler() http.Handler {
 	handler := http.NewServeMux()
 	handler.HandleFunc("/create-quiz", createQuizHandler)
+	handler.HandleFunc("/secret", secret)
+	handler.HandleFunc("/login", login)
+	handler.HandleFunc("/logout", logout)
 	return handler
 }
 
@@ -18,16 +21,19 @@ func createQuizHandler(w http.ResponseWriter, r *http.Request) {
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		log.Log(log.ReadBody)
+		http.Error(w, "Error", http.StatusInternalServerError)
 		return
 	}
 
-	var quiz action.NewQuiz
+	var quiz api.NewQuiz
 	if err := json.Unmarshal(body, &quiz); err != nil {
 		log.Log(log.Unmarshal, log.JSONData(body))
+		http.Error(w, "Error", http.StatusInternalServerError)
 		return
 	}
 
-	if err := action.CreateQuiz(r.Context(), quiz); err != nil {
+	if err := api.CreateQuiz(r.Context(), quiz); err != nil {
+		http.Error(w, "Error", http.StatusInternalServerError)
 		return
 	}
 

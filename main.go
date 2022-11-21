@@ -3,21 +3,20 @@ package main
 import (
 	"exampleproject/db"
 	"exampleproject/log"
-	"exampleproject/serve"
-	"fmt"
-	"os"
+	"exampleproject/server"
 
 	"github.com/joho/godotenv"
 )
 
-func main() {
-	fmt.Println(os.Getenv("GOMOD"))
+func init() {
 	err := godotenv.Load(".env")
 	if err != nil {
 		log.Log(log.ReadingEnv, log.Err(err))
 		panic(err)
 	}
+}
 
+func main() {
 	if err := db.Connect(); err != nil {
 		panic(err)
 	}
@@ -26,10 +25,9 @@ func main() {
 		panic(err)
 	}
 
-	signalShutdown, _ := serve.Listen()
+	signalShutdown, _ := server.Listen()
 
 	if err := <-signalShutdown; err != nil {
 		panic(err)
 	}
-
 }
