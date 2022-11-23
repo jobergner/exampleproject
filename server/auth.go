@@ -14,21 +14,25 @@ import (
 var (
 	// key must be 16, 24 or 32 bytes long (AES-128, AES-192 or AES-256)
 	key            = []byte("super-secret-key")
-	store          = sessions.NewCookieStore(key)
+	store          = sessions.NewCookieStore(key) // TODO
 	authCookieName = "exampleproject_authenticated"
 )
 
+func authMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		session, _ := store.Get(r, authCookieName)
+
+		if auth, ok := session.Values["authenticated"].(bool); !ok || !auth {
+			http.Error(w, "Forbidden", http.StatusForbidden)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
+}
+
 func secret(w http.ResponseWriter, r *http.Request) {
-	session, _ := store.Get(r, authCookieName)
-
-	// Check if user is authenticated
-	if auth, ok := session.Values["authenticated"].(bool); !ok || !auth {
-		http.Error(w, "Forbidden", http.StatusForbidden)
-		return
-	}
-
-	// Print secret message
-	fmt.Fprintln(w, "The cake is a lie!")
+	fmt.Fprintln(w, "secret message")
 }
 
 func login(w http.ResponseWriter, r *http.Request) {

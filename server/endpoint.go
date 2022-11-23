@@ -11,9 +11,10 @@ import (
 func newHandler() http.Handler {
 	handler := http.NewServeMux()
 	handler.HandleFunc("/create-quiz", createQuizHandler)
-	handler.HandleFunc("/secret", secret)
 	handler.HandleFunc("/login", login)
 	handler.HandleFunc("/logout", logout)
+
+	handler.Handle("/secret", authMiddleware(http.HandlerFunc(secret)))
 	return handler
 }
 

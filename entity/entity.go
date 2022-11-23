@@ -1,6 +1,7 @@
 // entity holds our database schema entities and some utility values & functions
 package entity
 
+type UserID int
 type QuizID int
 type CategoryID int
 type ChoiceID int
@@ -59,4 +60,22 @@ type Choice struct {
 	IsCorrect bool
 	Content   string
 	Archived  bool
+}
+
+var UserMeta = Meta{
+	TableName: "Users",
+	Columns: []string{
+		"ID",
+		"Name",
+		"PasswordHash",
+		"Archived",
+	},
+	primaryKey: "ID",
+}
+
+type User struct {
+	ID           UserID
+	Name         string
+	PasswordHash []byte
+	Archived     bool
 }

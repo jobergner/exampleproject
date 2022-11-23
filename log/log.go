@@ -5,6 +5,8 @@ import (
 )
 
 const (
+	CompareHash    = "failed comparing hash with password"
+	CreateHash     = "failed creating hash from password"
 	ReadingEnv     = "failed reading environment variables"
 	ServerShutdown = "failed shutting down server"
 	BeginTSX       = "failed creating transaction"

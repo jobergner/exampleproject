@@ -24,6 +24,10 @@ func JSONData(data []byte) single {
 	return newSingle(zap.ByteString("JSONData", data))
 }
 
+func Password(password string) single {
+	return newSingle(zap.String("Password", password))
+}
+
 func Exprs(exprs ...expression.Expr) multi {
 	fields := make([]zap.Field, 0, len(exprs))
 	for _, expr := range exprs {

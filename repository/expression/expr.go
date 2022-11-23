@@ -38,3 +38,7 @@ func TitleEquals(title string) Expr {
 func IsNotArchived() Expr {
 	return Expr{SQL: squirrel.Expr("Archived = 1"), Name: "IsNotArchived"}
 }
+
+func UserNameEquals(name string) Expr {
+	return Expr{SQL: squirrel.Expr("Name = ?", name), Name: "UserNameEquals"}
+}

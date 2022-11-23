@@ -15,6 +15,6 @@ type (
 	}
 	LoginData struct {
 		Name     string
-		password string
+		Password string
 	}
 )
