@@ -3,6 +3,7 @@ package log
 import (
 	"exampleproject/entity"
 	"exampleproject/repository/expression"
+	"fmt"
 
 	"github.com/Masterminds/squirrel"
 	"go.uber.org/zap"
@@ -33,7 +34,7 @@ func Exprs(exprs ...expression.Expr) multi {
 	for _, expr := range exprs {
 		fields = append(fields, zap.String(expr.Name, squirrel.DebugSqlizer(expr.SQL)))
 	}
-	return newMulti(fields)
+	return newMulti(fields...)
 }
 
 func SQLQuery(builder squirrel.Sqlizer) single {
@@ -42,4 +43,11 @@ func SQLQuery(builder squirrel.Sqlizer) single {
 
 func Err(err error) single {
 	return newSingle(zap.String("Error", err.Error()))
+}
+
+func UnexpectedType(actual any, expected any) multi {
+	return newMulti(
+		zap.String("UnexpectedType", fmt.Sprintf("%T", actual)),
+		zap.String("ExpectedType", fmt.Sprintf("%T", expected)),
+	)
 }

@@ -5,6 +5,9 @@ import (
 )
 
 const (
+	SaveToSession  = "failed saving value to session"
+	GetFromSession = "failed getting value from session"
+	CastInterface  = "failed casting interface"
 	CompareHash    = "failed comparing hash with password"
 	CreateHash     = "failed creating hash from password"
 	ReadingEnv     = "failed reading environment variables"
@@ -66,7 +69,7 @@ type multi struct {
 	fields []zap.Field
 }
 
-func newMulti(fields []zap.Field) multi {
+func newMulti(fields ...zap.Field) multi {
 	return multi{fields: fields}
 }
 
