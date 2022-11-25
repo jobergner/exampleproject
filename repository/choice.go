@@ -18,7 +18,7 @@ func NewChoiceRepository() *ChoiceRepository {
 	return new(ChoiceRepository)
 }
 
-func (q *ChoiceRepository) Get(ctx context.Context, selectors ...expression.Expr) (*entity.Choice, error) {
+func (q *ChoiceRepository) Get(ctx context.Context, selectors ...expression.Selector) (*entity.Choice, error) {
 	choices, err := q.List(ctx, selectors...)
 	if err != nil {
 		return nil, err
@@ -36,11 +36,11 @@ func (q *ChoiceRepository) Get(ctx context.Context, selectors ...expression.Expr
 	return &choices[0], nil
 }
 
-func (q *ChoiceRepository) List(ctx context.Context, selectors ...expression.Expr) ([]entity.Choice, error) {
+func (q *ChoiceRepository) List(ctx context.Context, selectors ...expression.Selector) ([]entity.Choice, error) {
 	builder := squirrel.Select(entity.ChoiceMeta.Columns...).From(entity.ChoiceMeta.TableName)
 
 	for _, expr := range selectors {
-		builder = builder.Where(expr.SQL)
+		builder = builder.Where(expr.Where)
 	}
 
 	sqlStr, args, err := builder.ToSql()
@@ -61,11 +61,11 @@ func (q *ChoiceRepository) List(ctx context.Context, selectors ...expression.Exp
 	return choices, nil
 }
 
-func (q *ChoiceRepository) Update(ctx context.Context, transaction *db.TSX, setMap map[string]interface{}, selectors ...expression.Expr) error {
+func (q *ChoiceRepository) Update(ctx context.Context, transaction *db.TSX, setMap map[string]interface{}, selectors ...expression.Selector) error {
 	builder := squirrel.Update(entity.ChoiceMeta.TableName).SetMap(setMap)
 
 	for _, expr := range selectors {
-		builder = builder.Where(expr.SQL)
+		builder = builder.Where(expr.Where)
 	}
 
 	sqlStr, args, err := builder.ToSql()

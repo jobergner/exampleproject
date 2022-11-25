@@ -30,3 +30,14 @@ func (m Meta) ToInsertQueryString() string {
 
 	return sb.String()
 }
+
+func (m Meta) ColumnMap() map[string]struct{} {
+	cols := make(map[string]struct{})
+
+	for _, c := range m.Columns {
+		name := fmt.Sprintf("%s.%s", m.TableName, c)
+		cols[name] = struct{}{}
+	}
+
+	return cols
+}

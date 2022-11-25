@@ -18,7 +18,7 @@ func NewUserRepository() *UserRepository {
 	return new(UserRepository)
 }
 
-func (q *UserRepository) Get(ctx context.Context, selectors ...expression.Expr) (*entity.User, error) {
+func (q *UserRepository) Get(ctx context.Context, selectors ...expression.Selector) (*entity.User, error) {
 	users, err := q.List(ctx, selectors...)
 	if err != nil {
 		return nil, err
@@ -37,11 +37,11 @@ func (q *UserRepository) Get(ctx context.Context, selectors ...expression.Expr) 
 	return &users[0], nil
 }
 
-func (q *UserRepository) List(ctx context.Context, selectors ...expression.Expr) ([]entity.User, error) {
+func (q *UserRepository) List(ctx context.Context, selectors ...expression.Selector) ([]entity.User, error) {
 	builder := squirrel.Select(entity.UserMeta.Columns...).From(entity.UserMeta.TableName)
 
 	for _, expr := range selectors {
-		builder = builder.Where(expr.SQL)
+		builder = builder.Where(expr.Where)
 	}
 
 	sqlStr, args, err := builder.ToSql()
@@ -62,11 +62,11 @@ func (q *UserRepository) List(ctx context.Context, selectors ...expression.Expr)
 	return users, nil
 }
 
-func (q *UserRepository) Update(ctx context.Context, transaction *db.TSX, setMap map[string]interface{}, selectors ...expression.Expr) error {
+func (q *UserRepository) Update(ctx context.Context, transaction *db.TSX, setMap map[string]interface{}, selectors ...expression.Selector) error {
 	builder := squirrel.Update(entity.UserMeta.TableName).SetMap(setMap)
 
 	for _, expr := range selectors {
-		builder = builder.Where(expr.SQL)
+		builder = builder.Where(expr.Where)
 	}
 
 	sqlStr, args, err := builder.ToSql()

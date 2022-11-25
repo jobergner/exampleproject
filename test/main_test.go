@@ -33,11 +33,11 @@ func TestMain(t *testing.T) {
 	defer cancel()
 
 	if err := db.Connect(); err != nil {
-		panic(err)
+		t.Fatal(err)
 	}
 
 	if err := db.MigrateUp(); err != nil {
-		panic(err)
+		t.Fatal(err)
 	}
 
 	signalShutdown, signalSigInt := server.Listen()
@@ -47,6 +47,6 @@ func TestMain(t *testing.T) {
 	signalSigInt <- syscall.SIGINT
 
 	if err := <-signalShutdown; err != nil {
-		panic(err)
+		t.Fatal(err)
 	}
 }

@@ -29,10 +29,10 @@ func Password(password string) single {
 	return newSingle(zap.String("Password", password))
 }
 
-func Exprs(exprs ...expression.Expr) multi {
+func Exprs(exprs ...expression.Selector) multi {
 	fields := make([]zap.Field, 0, len(exprs))
 	for _, expr := range exprs {
-		fields = append(fields, zap.String(expr.Name, squirrel.DebugSqlizer(expr.SQL)))
+		fields = append(fields, zap.String(expr.Name, squirrel.DebugSqlizer(expr.Where)))
 	}
 	return newMulti(fields...)
 }

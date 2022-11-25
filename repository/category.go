@@ -7,9 +7,10 @@ import (
 	"exampleproject/db"
 	"exampleproject/entity"
 	"exampleproject/log"
-	"exampleproject/repository/expression"
+	"exampleproject/repository/selector"
 
 	"github.com/Masterminds/squirrel"
+	"golang.org/x/exp/maps"
 )
 
 type CategoryRepository struct{}
@@ -18,7 +19,7 @@ func NewCategoryRepository() *CategoryRepository {
 	return new(CategoryRepository)
 }
 
-func (q *CategoryRepository) Get(ctx context.Context, selectors ...expression.Expr) (*entity.Category, error) {
+func (q *CategoryRepository) Get(ctx context.Context, selectors ...selector.Selector) (*entity.Category, error) {
 	categories, err := q.List(ctx, selectors...)
 	if err != nil {
 		return nil, err
@@ -37,11 +38,15 @@ func (q *CategoryRepository) Get(ctx context.Context, selectors ...expression.Ex
 	return &categories[0], nil
 }
 
-func (q *CategoryRepository) List(ctx context.Context, selectors ...expression.Expr) ([]entity.Category, error) {
-	builder := squirrel.Select(entity.CategoryMeta.Columns...).From(entity.CategoryMeta.TableName)
+func (q *CategoryRepository) List(ctx context.Context, selectors ...selector.Selector) ([]entity.Category, error) {
+	cols := entity.CategoryMeta.ColumnMap()
+	for _, s := range selectors {
+		s.ApplyColumns(cols)
+	}
 
+	builder := squirrel.Select(maps.Keys(cols)...).From(entity.CategoryMeta.TableName)
 	for _, expr := range selectors {
-		builder = builder.Where(expr.SQL)
+		builder = expr.ApplyExpressions(builder)
 	}
 
 	sqlStr, args, err := builder.ToSql()
@@ -62,11 +67,11 @@ func (q *CategoryRepository) List(ctx context.Context, selectors ...expression.E
 	return categories, nil
 }
 
-func (q *CategoryRepository) Update(ctx context.Context, transaction *db.TSX, setMap map[string]interface{}, selectors ...expression.Expr) error {
+func (q *CategoryRepository) Update(ctx context.Context, transaction *db.TSX, setMap map[string]interface{}, selectors ...selector.Selector) error {
 	builder := squirrel.Update(entity.CategoryMeta.TableName).SetMap(setMap)
 
 	for _, expr := range selectors {
-		builder = builder.Where(expr.SQL)
+		builder = builder.Where(expr.Where)
 	}
 
 	sqlStr, args, err := builder.ToSql()
