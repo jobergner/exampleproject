@@ -2,7 +2,7 @@ package log
 
 import (
 	"exampleproject/entity"
-	"exampleproject/repository/expression"
+	"exampleproject/repository/selector"
 	"fmt"
 
 	"github.com/Masterminds/squirrel"
@@ -29,10 +29,10 @@ func Password(password string) single {
 	return newSingle(zap.String("Password", password))
 }
 
-func Exprs(exprs ...expression.Selector) multi {
-	fields := make([]zap.Field, 0, len(exprs))
-	for _, expr := range exprs {
-		fields = append(fields, zap.String(expr.Name, squirrel.DebugSqlizer(expr.Where)))
+func Selectors(selectors ...selector.Selector) multi {
+	fields := make([]zap.Field, 0, len(selectors))
+	for _, s := range selectors {
+		fields = append(fields, zap.String(s.Name, squirrel.DebugSqlizer(s.Where)))
 	}
 	return newMulti(fields...)
 }

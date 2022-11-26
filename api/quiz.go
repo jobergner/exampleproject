@@ -5,12 +5,12 @@ import (
 	"exampleproject/db"
 	"exampleproject/entity"
 	"exampleproject/repository"
-	"exampleproject/repository/expression"
+	"exampleproject/repository/selector"
 )
 
 func IsChoiceCorrect(ctx context.Context, choiceID entity.ChoiceID) (bool, error) {
-	choice, err := repository.Default.Choice.Get(ctx, expression.IDEquals(int(choiceID)))
-	if err != nil {
+	var choice entity.Choice
+	if err := repository.Default.Choice.Get(ctx, &choice, selector.IDEquals(int(choiceID))); err != nil {
 		return false, err
 	}
 
@@ -37,7 +37,7 @@ func CreateQuiz(ctx context.Context, newQuiz NewQuiz) error {
 
 	for _, newChoice := range newQuiz.Choices {
 		choice := entity.Choice{
-			QuizID:    quizID,
+			QuizID:    entity.QuizID(quizID),
 			IsCorrect: newChoice.IsCorrect,
 			Content:   newChoice.Content,
 		}

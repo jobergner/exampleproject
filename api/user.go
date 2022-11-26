@@ -7,14 +7,14 @@ import (
 	"exampleproject/entity"
 	"exampleproject/log"
 	"exampleproject/repository"
-	"exampleproject/repository/expression"
+	"exampleproject/repository/selector"
 
 	"golang.org/x/crypto/bcrypt"
 )
 
 func AuthenticateUser(ctx context.Context, loginData LoginData) (bool, error) {
-	user, err := repository.Default.User.Get(ctx, expression.UserNameEquals(loginData.Name), expression.IsNotArchived())
-	if err != nil {
+	var user entity.User
+	if err := repository.Default.User.Get(ctx, selector.UserNameEquals(loginData.Name), selector.IsNotArchived()); err != nil {
 		return false, err
 	}
 
