@@ -6,9 +6,10 @@ import (
 	"errors"
 	"exampleproject/db"
 	"exampleproject/entity"
+	"exampleproject/entity/selector"
 	"exampleproject/log"
-	"exampleproject/repository/query"
-	"exampleproject/repository/selector"
+
+	"github.com/jmoiron/sqlx"
 )
 
 type (
@@ -21,6 +22,12 @@ type (
 		Quiz     *Repository
 		Choice   *Repository
 		User     *Repository
+	}
+
+	QueryExecuter interface {
+		NamedExecContext(ctx context.Context, query string, arg interface{}) (sql.Result, error)
+		ExecContext(ctx context.Context, query string, args ...interface{}) (sql.Result, error)
+		SelectContext(ctx context.Context, dest interface{}, query string, args ...interface{}) error
 	}
 )
 
@@ -36,7 +43,15 @@ func NewRepository(meta entity.Meta) *Repository {
 }
 
 func (r *Repository) Get(ctx context.Context, dest any, selectors ...selector.Selector) error {
-	builder := query.NewSelectBuilder(r.meta, selectors...)
+	return r.get(ctx, db.DB, dest, selectors...)
+}
+
+func (r *Repository) GetTsx(ctx context.Context, tsx *sqlx.Tx, dest any, selectors ...selector.Selector) error {
+	return r.get(ctx, tsx, dest, selectors...)
+}
+
+func (r *Repository) get(ctx context.Context, db QueryExecuter, dest any, selectors ...selector.Selector) error {
+	builder := selector.NewSelectBuilder(r.meta, selectors...)
 
 	sqlStr, args, err := builder.ToSql()
 	if err != nil {
@@ -44,7 +59,7 @@ func (r *Repository) Get(ctx context.Context, dest any, selectors ...selector.Se
 		return err
 	}
 
-	if err := db.DB.SelectContext(ctx, dest, sqlStr, args...); err != nil {
+	if err := db.SelectContext(ctx, dest, sqlStr, args...); err != nil {
 		log.Log(log.QuerySelect, log.Err(err), log.SQLQuery(builder))
 		return err
 	}
@@ -53,7 +68,15 @@ func (r *Repository) Get(ctx context.Context, dest any, selectors ...selector.Se
 }
 
 func (r *Repository) List(ctx context.Context, dest any, selectors ...selector.Selector) error {
-	builder := query.NewSelectBuilder(r.meta, selectors...)
+	return r.list(ctx, db.DB, dest, selectors...)
+}
+
+func (r *Repository) ListTsx(ctx context.Context, tsx *sqlx.Tx, dest any, selectors ...selector.Selector) error {
+	return r.list(ctx, tsx, dest, selectors...)
+}
+
+func (r *Repository) list(ctx context.Context, db QueryExecuter, dest any, selectors ...selector.Selector) error {
+	builder := selector.NewSelectBuilder(r.meta, selectors...)
 
 	sqlStr, args, err := builder.ToSql()
 	if err != nil {
@@ -61,7 +84,7 @@ func (r *Repository) List(ctx context.Context, dest any, selectors ...selector.S
 		return err
 	}
 
-	if err := db.DB.SelectContext(ctx, dest, sqlStr, args...); err != nil {
+	if err := db.SelectContext(ctx, dest, sqlStr, args...); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil
 		}
@@ -72,8 +95,16 @@ func (r *Repository) List(ctx context.Context, dest any, selectors ...selector.S
 	return nil
 }
 
-func (r *Repository) Update(ctx context.Context, transaction *db.TSX, setMap map[string]interface{}, selectors ...selector.Selector) error {
-	builder := query.NewUpdateBuilder(r.meta, setMap, selectors...)
+func (r *Repository) Update(ctx context.Context, setMap map[string]interface{}, selectors ...selector.Selector) error {
+	return r.update(ctx, db.DB, setMap, selectors...)
+}
+
+func (r *Repository) UpdateTsx(ctx context.Context, tsx *sqlx.Tx, setMap map[string]interface{}, selectors ...selector.Selector) error {
+	return r.update(ctx, tsx, setMap, selectors...)
+}
+
+func (r *Repository) update(ctx context.Context, db QueryExecuter, setMap map[string]interface{}, selectors ...selector.Selector) error {
+	builder := selector.NewUpdateBuilder(r.meta, setMap, selectors...)
 
 	sqlStr, args, err := builder.ToSql()
 	if err != nil {
@@ -81,7 +112,7 @@ func (r *Repository) Update(ctx context.Context, transaction *db.TSX, setMap map
 		return err
 	}
 
-	if _, err := transaction.Get().ExecContext(ctx, sqlStr, args...); err != nil {
+	if _, err := db.ExecContext(ctx, sqlStr, args...); err != nil {
 		log.Log(log.QueryUpdate, log.Err(err), log.SQLQuery(builder))
 		return err
 	}
@@ -89,8 +120,16 @@ func (r *Repository) Update(ctx context.Context, transaction *db.TSX, setMap map
 	return nil
 }
 
-func (r *Repository) Create(ctx context.Context, transaction *db.TSX, item any) (int64, error) {
-	result, err := transaction.Get().NamedExecContext(ctx, r.meta.ToInsertQueryString(), item)
+func (r *Repository) Create(ctx context.Context, item any) (int64, error) {
+	return r.create(ctx, db.DB, item)
+}
+
+func (r *Repository) CreateTsx(ctx context.Context, tsx *sqlx.Tx, item any) (int64, error) {
+	return r.create(ctx, tsx, item)
+}
+
+func (r *Repository) create(ctx context.Context, db QueryExecuter, item any) (int64, error) {
+	result, err := db.NamedExecContext(ctx, r.meta.ToInsertQueryString(), item)
 	if err != nil {
 		log.Log(log.QueryCreate, log.Err(err))
 		return 0, err

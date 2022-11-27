@@ -2,7 +2,7 @@ package log
 
 import (
 	"exampleproject/entity"
-	"exampleproject/repository/selector"
+	"exampleproject/entity/selector"
 	"fmt"
 
 	"github.com/Masterminds/squirrel"

@@ -1,8 +1,8 @@
-package category
+package user
 
 import (
 	"exampleproject/entity"
-	"exampleproject/repository/selector"
+	"exampleproject/entity/selector"
 
 	"github.com/Masterminds/squirrel"
 )
@@ -11,8 +11,8 @@ func IDEquals(id entity.CategoryID) selector.Selector {
 	return selector.Selector{Where: squirrel.Expr("ID = ?", id), Name: "IDEquals"}
 }
 
-func TitleEquals(title string) selector.Selector {
-	return selector.Selector{Where: squirrel.Expr("Title = ?", title), Name: "TitleEquals"}
+func NameEquals(name string) selector.Selector {
+	return selector.Selector{Where: squirrel.Expr("Name = ?", name), Name: "NameEquals"}
 }
 
 func IsNotArchived() selector.Selector {

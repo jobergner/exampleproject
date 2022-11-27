@@ -1,7 +1,8 @@
-DROP TABLE Categories;
+DROP TABLE categories;
 
-DROP TABLE Quizzes; 
+DROP TABLE quizzes; 
 
-DROP TABLE Choices;
+DROP TABLE choices;
 
-DROP TABLE Users;
+DROP TABLE users;
+

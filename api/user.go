@@ -3,22 +3,21 @@ package api
 import (
 	"context"
 	"errors"
-	"exampleproject/db"
 	"exampleproject/entity"
+	"exampleproject/entity/selector/user"
 	"exampleproject/log"
 	"exampleproject/repository"
-	"exampleproject/repository/selector"
 
 	"golang.org/x/crypto/bcrypt"
 )
 
 func AuthenticateUser(ctx context.Context, loginData LoginData) (bool, error) {
-	var user entity.User
-	if err := repository.Default.User.Get(ctx, selector.UserNameEquals(loginData.Name), selector.IsNotArchived()); err != nil {
+	var u entity.User
+	if err := repository.Default.User.Get(ctx, user.NameEquals(loginData.Name), user.IsNotArchived()); err != nil {
 		return false, err
 	}
 
-	if err := bcrypt.CompareHashAndPassword(user.PasswordHash, []byte(loginData.Password)); err != nil {
+	if err := bcrypt.CompareHashAndPassword(u.PasswordHash, []byte(loginData.Password)); err != nil {
 		if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
 			return false, nil
 		}
@@ -35,12 +34,12 @@ func CreateUser(ctx context.Context, loginData LoginData) error {
 		return err
 	}
 
-	user := &entity.User{
+	u := &entity.User{
 		Name:         loginData.Name,
 		PasswordHash: passwordHash,
 	}
 
-	if _, err := repository.Default.User.Create(ctx, db.NoTSX, user); err != nil {
+	if _, err := repository.Default.User.Create(ctx, u); err != nil {
 		return err
 	}
 

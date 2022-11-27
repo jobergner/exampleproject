@@ -1,14 +1,13 @@
-package query
+package selector
 
 import (
 	"exampleproject/entity"
-	"exampleproject/repository/selector"
 
 	"github.com/Masterminds/squirrel"
 	"golang.org/x/exp/maps"
 )
 
-func NewSelectBuilder(meta entity.Meta, selectors ...selector.Selector) squirrel.SelectBuilder {
+func NewSelectBuilder(meta entity.Meta, selectors ...Selector) squirrel.SelectBuilder {
 	cols := meta.ColumnMap()
 	for _, s := range selectors {
 		for _, c := range s.Columns {
@@ -31,7 +30,7 @@ func NewSelectBuilder(meta entity.Meta, selectors ...selector.Selector) squirrel
 	return builder
 }
 
-func NewUpdateBuilder(meta entity.Meta, setMap map[string]interface{}, selectors ...selector.Selector) squirrel.UpdateBuilder {
+func NewUpdateBuilder(meta entity.Meta, setMap map[string]interface{}, selectors ...Selector) squirrel.UpdateBuilder {
 	builder := squirrel.Update(meta.TableName).SetMap(setMap)
 
 	for _, s := range selectors {

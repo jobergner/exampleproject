@@ -4,9 +4,10 @@ import (
 	"context"
 	"exampleproject/db"
 	"exampleproject/entity"
+	"exampleproject/entity/selector/category"
+	"exampleproject/entity/selector/quiz"
 	"exampleproject/log"
 	"exampleproject/repository"
-	"exampleproject/repository/selector/quiz"
 	"fmt"
 	"testing"
 
@@ -33,5 +34,8 @@ func TestCate(t *testing.T) {
 	var quizzes []entity.Quiz
 	fmt.Println(repository.Default.Quiz.List(context.TODO(), &quizzes, quiz.OfArchivedCategorys()))
 	fmt.Println(quizzes)
+	var cats []category.CategoryWithQuizCount
+	fmt.Println(repository.Default.Category.List(context.TODO(), &cats, category.WithQuizCount(), category.IsNotArchived()))
+	fmt.Println(cats)
 	t.FailNow()
 }

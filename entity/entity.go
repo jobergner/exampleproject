@@ -7,75 +7,75 @@ type CategoryID int
 type ChoiceID int
 
 var CategoryMeta = Meta{
-	TableName: "Categories",
+	TableName: "categories",
 	Columns: []string{
-		"ID",
-		"Title",
-		"Archived",
+		"id",
+		"title",
+		"archived",
 	},
-	primaryKey: "ID",
+	primaryKey: "id",
 }
 
 type Category struct {
-	ID       CategoryID
-	Title    string
-	Archived bool
+	ID       CategoryID `db:"id"`
+	Title    string     `db:"title"`
+	Archived bool       `db:"archived"`
 }
 
 var QuizMeta = Meta{
-	TableName: "Quizzes",
+	TableName: "quizzes",
 	Columns: []string{
-		"ID",
-		"CategoryID",
-		"Title",
-		"Description",
-		"Archived",
+		"id",
+		"category_id",
+		"title",
+		"description",
+		"archived",
 	},
-	primaryKey: "ID",
+	primaryKey: "id",
 }
 
 type Quiz struct {
-	ID          QuizID
-	CategoryID  CategoryID
-	Title       string
-	Description string
-	Archived    bool
+	ID          QuizID     `db:"id"`
+	CategoryID  CategoryID `db:"category_id"`
+	Title       string     `db:"title"`
+	Description string     `db:"description"`
+	Archived    bool       `db:"archived"`
 }
 
 var ChoiceMeta = Meta{
-	TableName: "Choices",
+	TableName: "choices",
 	Columns: []string{
-		"ID",
-		"QuizID",
-		"IsCorrect",
-		"Content",
-		"Archived",
+		"id",
+		"quiz_id",
+		"is_correct",
+		"content",
+		"archived",
 	},
-	primaryKey: "ID",
+	primaryKey: "id",
 }
 
 type Choice struct {
-	ID        ChoiceID
-	QuizID    QuizID
-	IsCorrect bool
-	Content   string
-	Archived  bool
+	ID        ChoiceID `db:"id"`
+	QuizID    QuizID   `db:"quiz_id"`
+	IsCorrect bool     `db:"is_correct"`
+	Content   string   `db:"content"`
+	Archived  bool     `db:"archived"`
 }
 
 var UserMeta = Meta{
-	TableName: "Users",
+	TableName: "users",
 	Columns: []string{
-		"ID",
-		"Name",
-		"PasswordHash",
-		"Archived",
+		"id",
+		"name",
+		"password_hash",
+		"archived",
 	},
-	primaryKey: "ID",
+	primaryKey: "id",
 }
 
 type User struct {
-	ID           UserID
-	Name         string
-	PasswordHash []byte
-	Archived     bool
+	ID           UserID `db:"id"`
+	Name         string `db:"name"`
+	PasswordHash []byte `db:"password_hash"`
+	Archived     bool   `db:"archived"`
 }
